@@ -394,64 +394,110 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#btnCloseHelp")?.addEventListener("click", () => {
     $("#helpOverlay").classList.add("hidden");
   });
+
+  // ------------------------------
+  // Draggable calculator
+  // ------------------------------
+  // ui.js is loaded before the HTML markup in this project, so any DOM query
+  // for .calcCard MUST happen after DOMContentLoaded.
+  (function makeCalculatorDraggable() {
+    const card = document.querySelector(".calcCard");
+    const header = card?.querySelector(".helpHeader");
+    if (!card || !header) return;
+
+    // Restore last position (if any)
+    try {
+      const saved = JSON.parse(localStorage.getItem("calcPos") || "null");
+      if (saved && saved.left && saved.top) {
+        card.style.left = saved.left;
+        card.style.top = saved.top;
+        card.style.right = "auto";
+        card.style.bottom = "auto";
+      }
+    } catch (_) {}
+
+    let dragging = false;
+    let activePointerId = null;
+    let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+    const startDrag = (clientX, clientY) => {
+      dragging = true;
+      card.classList.add("dragging");
+      const rect = card.getBoundingClientRect();
+      startX = clientX;
+      startY = clientY;
+      startLeft = rect.left;
+      startTop = rect.top;
+    };
+
+    const moveDrag = (clientX, clientY) => {
+      if (!dragging) return;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      const nextLeft = startLeft + dx;
+      const nextTop = startTop + dy;
+
+      // Keep card within viewport (small padding)
+      const pad = 8;
+      const w = card.offsetWidth || 0;
+      const h = card.offsetHeight || 0;
+      const maxLeft = window.innerWidth - w - pad;
+      const maxTop = window.innerHeight - h - pad;
+
+      card.style.left = clamp(nextLeft, pad, maxLeft) + "px";
+      card.style.top = clamp(nextTop, pad, maxTop) + "px";
+      card.style.right = "auto";
+      card.style.bottom = "auto";
+    };
+
+    const endDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      card.classList.remove("dragging");
+      try {
+        localStorage.setItem("calcPos", JSON.stringify({
+          left: card.style.left,
+          top: card.style.top,
+        }));
+      } catch (_) {}
+    };
+
+    // Pointer events (mouse + touch + pen) => most reliable
+    header.style.touchAction = "none";
+
+    header.addEventListener("pointerdown", (e) => {
+      // Ignore clicks on the close button
+      if (e.target?.closest?.("button")) return;
+      // Only left mouse button when it's a mouse
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+
+      activePointerId = e.pointerId;
+      startDrag(e.clientX, e.clientY);
+      try { header.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    });
+
+    header.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      if (activePointerId != null && e.pointerId !== activePointerId) return;
+      moveDrag(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+
+    const endPointer = (e) => {
+      if (activePointerId != null && e.pointerId !== activePointerId) return;
+      activePointerId = null;
+      endDrag();
+      try { header.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
+
+    header.addEventListener("pointerup", endPointer);
+    header.addEventListener("pointercancel", endPointer);
+  })();
 });
-(function makeCalculatorDraggable() {
-  const card = document.querySelector(".calcCard");
-  const header = card?.querySelector(".helpHeader");
-  if (!card || !header) return;
 
-  // ✅ HIER – opgeslagen positie terugzetten
-  const saved = JSON.parse(localStorage.getItem("calcPos") || "null");
-  if (saved) {
-    card.style.left = saved.left;
-    card.style.top = saved.top;
-    card.style.right = "auto";
-    card.style.bottom = "auto";
-  }
-
-  let dragging = false;
-  let startX, startY, startLeft, startTop;
-
-  header.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return;
-
-    dragging = true;
-    card.classList.add("dragging");
-
-    const rect = card.getBoundingClientRect();
-    startX = e.clientX;
-    startY = e.clientY;
-    startLeft = rect.left;
-    startTop = rect.top;
-
-    e.preventDefault();
-  });
-
-  document.addEventListener("mousemove", (e) => {
-    if (!dragging) return;
-
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-
-    card.style.left = startLeft + dx + "px";
-    card.style.top = startTop + dy + "px";
-    card.style.right = "auto";
-    card.style.bottom = "auto";
-  });
-
-  document.addEventListener("mouseup", () => {
-    if (!dragging) return;
-
-    dragging = false;
-    card.classList.remove("dragging");
-
-    // ✅ HIER – positie opslaan
-    localStorage.setItem("calcPos", JSON.stringify({
-      left: card.style.left,
-      top: card.style.top
-    }));
-  });
-})();
 
 
 /* ---------- Exports ---------- */
