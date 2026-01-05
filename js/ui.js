@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function calcRender() {
     if (!calcLCD) return;
-    const s = (calcExpr || "0").toString();
+    const s = (calcExpr || "0").toString().replace(/\./g, ",");
     calcLCD.textContent = s.length > 22 ? "…" + s.slice(-22) : s;
   }
 
@@ -332,8 +332,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (calcExpr === "Err") calcExpr = "";
 
-    // prevent double operators
-    if (/[+\-*/]/.test(k)) {
+    // Handle decimal separator (both "." and "," map to the same thing)
+    if (k === "." || k === ",") {
+      // Allow only one decimal point per number
+      const lastOperator = Math.max(
+        calcExpr.lastIndexOf("+"),
+        calcExpr.lastIndexOf("-"),
+        calcExpr.lastIndexOf("*"),
+        calcExpr.lastIndexOf("/")
+      );
+      const currentNumber = calcExpr.slice(lastOperator + 1);
+      if (currentNumber.includes(".") || currentNumber.includes(",")) return;
+      calcExpr += ".";
+    } else if (/[+\-*/]/.test(k)) {
+      // prevent double operators
       if (!calcExpr) return;
       if (/[+\-*/]$/.test(calcExpr)) {
         calcExpr = calcExpr.slice(0, -1) + k;
@@ -371,7 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const map = { Enter: "=", Backspace: "⌫", Delete: "C" };
     const k = map[e.key] || e.key;
-    if (/^[0-9]$/.test(k) || ["+", "-", "*", "/", "(", ")", ".", "=", "⌫", "C"].includes(k)) {
+    if (/^[0-9]$/.test(k) || ["+", "-", "*", "/", "(", ")", ".", ",", "=", "⌫", "C"].includes(k)) {
       e.preventDefault();
       calcKey(k);
     }
