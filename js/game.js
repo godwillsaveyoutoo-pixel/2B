@@ -38,11 +38,15 @@ function startGame({ topic, mode, limit = 0, count = 0, identity = null }) {
   const allowed = new Set(["vierhoek"]);
   const tid = topic?.id || "";
 
+  console.log("🎮 startGame called with topic:", topic, "tid:", tid, "allowed:", Array.from(allowed));
+  
   if (!allowed.has(tid)) {
     // kleine feedback (pas aan aan jouw UI)
+    console.warn("❌ Topic niet toegestaan:", tid);
     try { window.toast?.("⚠️ Alleen 'Vierhoek' is voorlopig actief."); } catch(_) {}
     return; // stop: start niet
   }
+  console.log("✅ Topic toegestaan:", tid);
   // ---------- Basis state ----------
   state.mode = mode;
   state.topic = topic;
