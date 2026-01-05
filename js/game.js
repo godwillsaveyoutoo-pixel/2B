@@ -34,6 +34,15 @@ let state = {
 
 /* ---------- Start game ---------- */
 function startGame({ topic, mode, limit = 0, count = 0, identity = null }) {
+  // ✅ TEMP: alleen vierhoek toelaten
+  const allowed = new Set(["vierhoek"]);
+  const tid = topic?.id || "";
+
+  if (!allowed.has(tid)) {
+    // kleine feedback (pas aan aan jouw UI)
+    try { window.toast?.("⚠️ Alleen 'Vierhoek' is voorlopig actief."); } catch(_) {}
+    return; // stop: start niet
+  }
   // ---------- Basis state ----------
   state.mode = mode;
   state.topic = topic;
