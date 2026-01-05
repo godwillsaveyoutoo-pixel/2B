@@ -996,6 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.querySelectorAll("#keypad .key").forEach(btn => {
   btn.addEventListener("click", () => {
     const k = btn.dataset.k;
+    if (k === ",") k = ".";              // intern met punt werken
     const inp = activeInput || document.getElementById("mainInput");
     if (!inp) return;
 
