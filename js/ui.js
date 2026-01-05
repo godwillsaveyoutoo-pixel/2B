@@ -395,6 +395,52 @@ document.addEventListener("DOMContentLoaded", () => {
     $("#helpOverlay").classList.add("hidden");
   });
 });
+(function makeCalculatorDraggable() {
+  const card = document.querySelector(".calcCard");
+  const header = card?.querySelector(".helpHeader");
+  if (!card || !header) return;
+
+  let dragging = false;
+  let startX, startY, startLeft, startTop;
+
+  header.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return; // alleen linkermuisknop
+
+    dragging = true;
+    card.classList.add("dragging");
+
+    const rect = card.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = rect.left;
+    startTop = rect.top;
+
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    card.style.left = startLeft + dx + "px";
+    card.style.top = startTop + dy + "px";
+    card.style.right = "auto";
+    card.style.bottom = "auto";
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (!dragging) return;
+    dragging = false;
+    card.classList.remove("dragging");
+    localStorage.setItem("calcPos", JSON.stringify({
+  left: card.style.left,
+  top: card.style.top
+}));
+
+  });
+})();
 
 /* ---------- Exports ---------- */
 window.updateUserPill = updateUserPill;

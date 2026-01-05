@@ -32,6 +32,23 @@
     overflow-x:hidden;
     overflow-y:auto;
   }
+/* Maak de calculator-kaart zwevend */
+.calcCard {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 3000;
+}
+
+/* Sleep-hint */
+.calcCard.dragging {
+  cursor: grabbing;
+}
+
+.helpHeader {
+  cursor: grab;
+  user-select: none;
+}
 
   .visualWrap img{width:100%; height:auto; max-height: clamp(320px, 52vh, 560px); display:block}
 /* Game: gebruik de beschikbare hoogte voor de visual.
