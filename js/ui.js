@@ -400,11 +400,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const header = card?.querySelector(".helpHeader");
   if (!card || !header) return;
 
+  // ✅ HIER – opgeslagen positie terugzetten
+  const saved = JSON.parse(localStorage.getItem("calcPos") || "null");
+  if (saved) {
+    card.style.left = saved.left;
+    card.style.top = saved.top;
+    card.style.right = "auto";
+    card.style.bottom = "auto";
+  }
+
   let dragging = false;
   let startX, startY, startLeft, startTop;
 
   header.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return; // alleen linkermuisknop
+    if (e.button !== 0) return;
 
     dragging = true;
     card.classList.add("dragging");
@@ -432,15 +441,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("mouseup", () => {
     if (!dragging) return;
+
     dragging = false;
     card.classList.remove("dragging");
-    localStorage.setItem("calcPos", JSON.stringify({
-  left: card.style.left,
-  top: card.style.top
-}));
 
+    // ✅ HIER – positie opslaan
+    localStorage.setItem("calcPos", JSON.stringify({
+      left: card.style.left,
+      top: card.style.top
+    }));
   });
 })();
+
 
 /* ---------- Exports ---------- */
 window.updateUserPill = updateUserPill;
