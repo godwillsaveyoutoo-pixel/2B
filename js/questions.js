@@ -1056,7 +1056,7 @@ function qVierhoekDrawParallelogram(level = "hard") {
   const b = pick([5, 7]);
   return qVierhoekDrawGeneric({
     levelSkill: `tekenen_${level}`,
-    prompt: `Teken een parallellogram met zijden ${a} cm en ${b} cm.`,
+    prompt: `Teken een rechthoek met zijden ${a} cm en ${b} cm.`,
     checkFn: (id) => _mrCheckParallelogramSides(id, a, b)
   });
 }
